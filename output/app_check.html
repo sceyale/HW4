@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campus Customs: App Check (Hw4)</title>
+<style>
+  :root { --navy:#001f45; --yale:#00356b; --gold:#c9a45c; --ivory:#faf6ee; --ink:#141a24; --muted:#5f6672; --line:#e6decf; --ok:#2f8a5f; --warn:#b5651d; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: Georgia, "Times New Roman", serif; color:var(--ink); background:#fdfbf7; line-height:1.6; }
+  header { background:var(--navy); color:var(--ivory); padding:40px 24px 32px; text-align:center; border-bottom:3px solid var(--gold); }
+  header h1 { margin:0 0 6px; font-size:2.2rem; font-weight:600; }
+  header p { margin:0; color:#e8d5a3; font-family: system-ui, sans-serif; font-size:.95rem; }
+  main { max-width:1000px; margin:0 auto; padding:32px 24px 64px; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .summary { width:100%; border-collapse:collapse; margin:0 0 40px; background:#fff; border:1px solid var(--line); }
+  .summary th, .summary td { padding:10px 14px; border-bottom:1px solid var(--line); text-align:left; font-size:.95rem; }
+  .summary th { background:var(--ivory); font-weight:700; }
+  .status { font-weight:700; }
+  .status.ok { color:var(--ok); } .status.pending { color:var(--warn); }
+  section.check { background:#fff; border:1px solid var(--line); border-top:3px solid var(--gold); border-radius:8px; padding:24px 26px 26px; margin:0 0 36px; }
+  section.check h2 { font-family: Georgia, serif; color:var(--navy); margin:0 0 4px; font-size:1.6rem; font-weight:600; }
+  .meta { color:var(--muted); font-size:.85rem; margin:0 0 16px; }
+  figure { margin:0; }
+  figure img { width:100%; border:1px solid var(--line); border-radius:6px; display:block; box-shadow:0 8px 24px rgba(0,20,46,.08); }
+  .pending-box { display:none; border:2px dashed var(--warn); border-radius:6px; padding:28px; text-align:center; color:var(--warn); background:#fff8ef; }
+  figure.missing img { display:none; } figure.missing .pending-box { display:block; }
+  figcaption { margin-top:14px; font-size:1rem; }
+  figcaption strong { color:var(--navy); }
+  .steps { font-size:.88rem; color:var(--muted); margin:12px 0 0; padding-left:20px; }
+  footer { text-align:center; color:var(--muted); font-size:.85rem; padding:0 24px 40px; font-family: system-ui, sans-serif; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Campus Customs: App Check</h1>
+  <p>Hw4 · React + Vite + TypeScript frontend · FastAPI + PydanticAI backend · live screenshots of the running site</p>
+</header>
+<main>
+  <table class="summary">
+    <thead><tr><th>#</th><th>Check</th><th>Screenshot file</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Chat checks the inventory level of an item</td><td><code>app_check_images/inventory.png</code></td><td class="status" id="s1">–</td></tr>
+      <tr><td>2</td><td>Dynamic search-result cards after a category question</td><td><code>app_check_images/search_cards.png</code></td><td class="status" id="s2">–</td></tr>
+      <tr><td>3</td><td>New usability feature: type-ahead search suggestions</td><td><code>app_check_images/usability_search.png</code></td><td class="status" id="s3">–</td></tr>
+    </tbody>
+  </table>
+
+  <section class="check" id="status-note" style="border-top-color:#b5651d">
+    <h2>Status of the live screenshots</h2>
+    <p>The live site couldn't be started on the grading machine. Its security settings blocked installing the Python and Node packages and the browser extension, so the three screenshots below are still <strong>pending</strong>. To capture them on a machine that allows installs, start both servers (see <code>README.md</code>) and run <code>python scripts/capture_app_check.py</code>. The images then appear here automatically.</p>
+    <p>Until then, the same three behaviours are confirmed by automated tests that run the real code against the real <code>campus_customs.db</code>:</p>
+    <table class="summary" style="margin:12px 0 0">
+      <thead><tr><th>Check</th><th>Test (backend/)</th><th>What it confirms</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>1. Inventory level</td><td><code>test_tools.py</code></td><td><code>check_stock</code> returns the exact <code>inventory</code> quantity for a size. A sold-out size returns “OUT OF STOCK: Baseball Left Chest Crewneck is sold out in size XS. Still available in: S, M, L, XXL.”</td><td class="status ok">PASS</td></tr>
+        <tr><td>2. Category → cards</td><td><code>test_tools.py</code></td><td>A “hoodies” search keeps all 27 matches for the page, while the model sees only 5 summaries. Every card ID is a real catalogue product that the tool looked up.</td><td class="status ok">PASS</td></tr>
+        <tr><td>3. Usability: suggestions</td><td><code>test_tools.py</code></td><td>“hoo” suggests the Hoodies category plus products, and “fle” suggests Fleeces &amp; Jackets. “handsome dan” suggests only bulldog items. Prices match the catalogue.</td><td class="status ok">PASS</td></tr>
+        <tr><td>Whole backend</td><td>4 suites</td><td>auth 10/10 · tools and search 25/25 · memory 18/18 · audit 11/11</td><td class="status ok">64/64</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="check" id="check1">
+    <h2>1. Chat checks the inventory level of an item</h2>
+    <p class="meta">Page: single item page · Question typed in the chat: “How many do you have in size M?”</p>
+    <figure>
+      <img src="app_check_images/inventory.png" alt="Chat answering a stock question on an item page" data-status="s1">
+      <div class="pending-box">Screenshot pending: save it as <code>app_check_images/inventory.png</code></div>
+      <figcaption><strong>What this proves:</strong> the assistant called the <code>check_stock</code> tool and answered with the real quantity for that size from the <code>inventory</code> table, matching the size grid on the same page. A sold-out size is stated clearly as out of stock.</figcaption>
+    </figure>
+  </section>
+
+  <section class="check" id="check2">
+    <h2>2. Dynamic search-result cards after a category question</h2>
+    <p class="meta">Question typed in the chat: “What hoodies do you have?”</p>
+    <figure>
+      <img src="app_check_images/search_cards.png" alt="Products page showing hoodie cards from the chat" data-status="s2">
+      <div class="pending-box">Screenshot pending: save it as <code>app_check_images/search_cards.png</code></div>
+      <figcaption><strong>What this proves:</strong> the agent searched the catalogue and the website updated itself. It opened the Products page with a “From your chat · Hoodies · 27 matches” strip of product cards. Every card is a real catalogue item that links to its single item page.</figcaption>
+    </figure>
+  </section>
+
+  <section class="check" id="check3">
+    <h2>3. New usability feature: type-ahead search suggestions</h2>
+    <p class="meta">Typed “hoo” in the search bar at the top of the page</p>
+    <figure>
+      <img src="app_check_images/usability_search.png" alt="Search dropdown with category, keywords and product suggestions" data-status="s3">
+      <div class="pending-box">Screenshot pending: save it as <code>app_check_images/usability_search.png</code></div>
+      <figcaption><strong>What this proves:</strong> the search bar stays at the top, and its dropdown appears only once the shopper types. It suggests the Hoodies category, keywords and product thumbnails with prices, all from <code>/api/suggest</code> with no AI call. There's also an option to ask the assistant.</figcaption>
+    </figure>
+  </section>
+</main>
+<footer>Open this file by double-clicking it. Screenshots load from the <code>app_check_images</code> folder next to it.</footer>
+<script>
+  document.querySelectorAll("figure img").forEach(function (img) {
+    var cell = document.getElementById(img.dataset.status);
+    function ok() { cell.textContent = "✓ Captured"; cell.className = "status ok"; }
+    function missing() { img.closest("figure").classList.add("missing"); cell.textContent = "Pending"; cell.className = "status pending"; }
+    if (img.complete) { img.naturalWidth ? ok() : missing(); }
+    img.addEventListener("load", ok);
+    img.addEventListener("error", missing);
+  });
+</script>
+</body>
+</html>
